@@ -7,7 +7,7 @@ namespace MaestroDetalleFJCO20241103.Models
     {
         public Computadora()
         {
-            Componentes = new HashSet<Componente>();
+            Componentes = new List<Componente>();
         }
 
         public int Id { get; set; }
@@ -15,6 +15,6 @@ namespace MaestroDetalleFJCO20241103.Models
         public string? Marca { get; set; }
         public decimal? Precio { get; set; }
 
-        public virtual ICollection<Componente> Componentes { get; set; }
+        public virtual IList<Componente> Componentes { get; set; }
     }
 }
