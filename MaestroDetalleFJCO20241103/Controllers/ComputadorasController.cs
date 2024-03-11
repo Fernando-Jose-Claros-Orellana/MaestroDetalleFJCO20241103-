@@ -47,7 +47,17 @@ namespace MaestroDetalleFJCO20241103.Controllers
         // GET: Computadoras/Create
         public IActionResult Create()
         {
-            return View();
+            var computadora = new Computadora();
+            computadora.Nombre = "";
+            computadora.Marca = "";
+            computadora.Precio = 0;
+            computadora.Componente = new List<Componente>();
+            computadora.Componente.Add(new Componente
+            {
+                Precio = 1
+            });
+            ViewBag.Accion = "Create";
+            return View(computadora);
         }
 
         // POST: Computadoras/Create
@@ -55,7 +65,7 @@ namespace MaestroDetalleFJCO20241103.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nombre,Marca,Precio")] Computadora computadora)
+        public async Task<IActionResult> Create([Bind("Id,Nombre,Marca,Precio,Componente")] Computadora computadora)
         {
             if (ModelState.IsValid)
             {
@@ -64,6 +74,31 @@ namespace MaestroDetalleFJCO20241103.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(computadora);
+        }
+        [HttpPost]
+        public ActionResult AgregarDetalles([Bind("Id,Nombre,Marca,Precio,Componente")] Computadora computadora, string accion)
+        {
+            computadora.Componente.Add(new Componente { Precio = 1 });
+            ViewBag.Accion = accion;
+            return View(accion, computadora);
+        }
+
+        [HttpPost]
+        public ActionResult EliminarDetalles([Bind("Id,Nombre,Marca,Precio,Componente")] Computadora computadora,
+               int index, string accion)
+        {
+            var det = computadora.Componente[index];
+            if (accion == "Edit" && det.Id > 0)
+            {
+                det.Id = det.Id * -1;
+            }
+            else
+            {
+                computadora.Componente.RemoveAt(index);
+            }
+
+            ViewBag.Accion = accion;
+            return View(accion, computadora);
         }
 
         // GET: Computadoras/Edit/5

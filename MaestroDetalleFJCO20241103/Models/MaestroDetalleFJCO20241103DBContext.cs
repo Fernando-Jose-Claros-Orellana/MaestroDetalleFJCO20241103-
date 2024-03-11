@@ -53,7 +53,7 @@ namespace MaestroDetalleFJCO20241103.Models
                     .HasColumnName("tipo");
 
                 entity.HasOne(d => d.Computadora)
-                    .WithMany(p => p.Componentes)
+                    .WithMany(p => p.Componente)
                     .HasForeignKey(d => d.ComputadoraId)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK__Component__preci__398D8EEE");
