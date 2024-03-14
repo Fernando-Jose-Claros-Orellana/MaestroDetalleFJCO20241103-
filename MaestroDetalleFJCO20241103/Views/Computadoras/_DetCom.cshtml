@@ -48,7 +48,17 @@
                             <input class="form-control" data-readonly type="text" name="Componente[@index].Nombre" value="@item.Nombre">
                         </td>
                         <td>
-                            <input class="form-control" data-readonly type="text" name="Componente[@index].Tipo" value="@item.Tipo">
+                            @if (ViewBag.EnableComboBox)
+                            {
+                                <select class="form-control" data-readonly type="text" name="Componente[@index].Tipo" value="@item.Tipo">
+                                    <option value="hardware">Hardware</option>
+                                    <option value="software">Software</option>
+                                </select>
+                            }
+                            else
+                            {
+                                <input class="form-control" type="text" name="Componente[@index].Tipo" value="@item.Tipo" readonly>
+                            }
                         </td>
                         <td>
                             <input class="form-control" data-readonly type="number" name="Componente[@index].Precio" value="@item.Precio">

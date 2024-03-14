@@ -35,12 +35,14 @@ namespace MaestroDetalleFJCO20241103.Controllers
             }
 
             var computadora = await _context.Computadoras
+                .Include(s=> s.Componente)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (computadora == null)
             {
                 return NotFound();
             }
-
+            ViewBag.EnableComboBox = false; // Deshabilitar el combo box en la vista Details
+            ViewBag.Accion = "Details";
             return View(computadora);
         }
 
@@ -56,6 +58,7 @@ namespace MaestroDetalleFJCO20241103.Controllers
             {
                 Precio = 1
             });
+            ViewBag.EnableComboBox = true; // Habilitar el combo box en la vista Create
             ViewBag.Accion = "Create";
             return View(computadora);
         }
@@ -80,6 +83,7 @@ namespace MaestroDetalleFJCO20241103.Controllers
         {
             computadora.Componente.Add(new Componente { Precio = 1 });
             ViewBag.Accion = accion;
+            ViewBag.EnableComboBox = true; // Habilitar el combo box en la vista Create
             return View(accion, computadora);
         }
 
@@ -96,7 +100,7 @@ namespace MaestroDetalleFJCO20241103.Controllers
             {
                 computadora.Componente.RemoveAt(index);
             }
-
+            ViewBag.EnableComboBox = true; // Habilitar el combo box en la vista Create
             ViewBag.Accion = accion;
             return View(accion, computadora);
         }
@@ -109,11 +113,15 @@ namespace MaestroDetalleFJCO20241103.Controllers
                 return NotFound();
             }
 
-            var computadora = await _context.Computadoras.FindAsync(id);
+            var computadora = await _context.Computadoras
+                  .Include(s => s.Componente)
+                  .FirstAsync(s => s.Id == id);
             if (computadora == null)
             {
                 return NotFound();
             }
+            ViewBag.EnableComboBox = true; // Habilitar el combo box en la vista Create
+            ViewBag.Accion = "Edit";
             return View(computadora);
         }
 
@@ -122,7 +130,7 @@ namespace MaestroDetalleFJCO20241103.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Marca,Precio")] Computadora computadora)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Marca,Precio,Componente")] Computadora computadora)
         {
             if (id != computadora.Id)
             {
@@ -133,7 +141,42 @@ namespace MaestroDetalleFJCO20241103.Controllers
             {
                 try
                 {
-                    _context.Update(computadora);
+                    // Obtener los datos de la base de datos que van a ser modificados
+                    var compUpdate = await _context.Computadoras
+                            .Include(s => s.Componente)
+                            .FirstAsync(s => s.Id == computadora.Id);
+                    compUpdate.Precio = computadora.Precio;
+                    compUpdate.Nombre = computadora.Nombre;
+                    compUpdate.Marca = computadora.Marca;
+                    // Obtener todos los detalles que seran nuevos y agregarlos a la base de datos
+                    var detNew = computadora.Componente.Where(s => s.Id == 0);
+                    foreach (var d in detNew)
+                    {
+                        compUpdate.Componente.Add(d);
+                    }
+                    // Obtener todos los detalles que seran modificados y actualizar a la base de datos
+                    var detUpdate = computadora.Componente.Where(s => s.Id > 0);
+                    foreach (var d in detUpdate)
+                    {
+                        var det = compUpdate.Componente.FirstOrDefault(s => s.Id == d.Id);
+                        det.Nombre = d.Nombre;
+                        det.Tipo = d.Tipo;
+                        det.Precio = d.Precio;
+                    }
+                    // Obtener todos los detalles que seran eliminados y actualizar a la base de datos
+                    var delDet = computadora.Componente.Where(s => s.Id < 0).ToList();
+                    if (delDet != null && delDet.Count > 0)
+                    {
+                        foreach (var d in delDet)
+                        {
+                            d.Id = d.Id * -1;
+                            var det = compUpdate.Componente.FirstOrDefault(s => s.Id == d.Id);
+                            _context.Remove(det);
+                            // facturaUpdate.DetFacturaVenta.Remove(det);
+                        }
+                    }
+
+                     _context.Update(compUpdate);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -161,12 +204,14 @@ namespace MaestroDetalleFJCO20241103.Controllers
             }
 
             var computadora = await _context.Computadoras
+                .Include(s => s.Componente)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (computadora == null)
             {
                 return NotFound();
             }
-
+            ViewBag.EnableComboBox = false; // Deshabilitar el combo box en la vista Details
+            ViewBag.Accion = "Delete";
             return View(computadora);
         }
 
@@ -179,7 +224,8 @@ namespace MaestroDetalleFJCO20241103.Controllers
             {
                 return Problem("Entity set 'MaestroDetalleFJCO20241103DBContext.Computadoras'  is null.");
             }
-            var computadora = await _context.Computadoras.FindAsync(id);
+            var computadora = await _context.Computadoras
+                .FindAsync(id);
             if (computadora != null)
             {
                 _context.Computadoras.Remove(computadora);
