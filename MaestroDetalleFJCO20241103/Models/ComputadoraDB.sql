@@ -17,5 +17,6 @@ CREATE TABLE Componente (
     computadora_id INT,
     nombre VARCHAR(100),
     tipo VARCHAR(50),
+    precio DECIMAL(10, 2),
     FOREIGN KEY (computadora_id) REFERENCES Computadora(id) ON DELETE CASCADE
 );
